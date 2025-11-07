@@ -170,10 +170,11 @@ def battle(player, monster):
 
 #  Carte et discriptions 
 MAP = [
-    ["Forêt", "Clairière", "Grotte"],
-    ["Rivière", "Départ",   "Marais"],
-    ["Cabane", "Canyon",    "Boss"]
-]
+    ["Forêt", "Clairière", "Grotte", "Montagne", "Lac"],
+    ["Rivière", "Départ", "Marais", "Plaines", "Temple"],
+    ["Cabane", "Canyon", "Boss", "Village", "Colline"],
+    ["Désert", "Ruines", "Mine", "Fort", "Tour"],
+    ["Port", "Forêt ancienne", "Caverne", "Prairie", "Château"] ]
 MAP_DESCRIPTIONS = {
     "Forêt": "Des arbres denses, l'ombre est partout.",
     "Clairière": "Un endroit calme, des fleurs parsèment le sol.",
@@ -183,11 +184,16 @@ MAP_DESCRIPTIONS = {
     "Marais": "Le sol est boueux et glissant.",
     "Cabane": "Une petite cabane abandonnée.",
     "Canyon": "Des parois élevées. On entend le vent.",
-    "Boss": "Un endroit sinistre... on sent la présence du boss."
+    "Boss": "Un endroit sinistre... on sent la présence du boss.",
+    "Montagne": "Des sommets enneigés dominent le paysage.",
+    "Lac": "Un grand lac paisible aux reflets argentés.",
+    "Village": "Un petit village avec des habitants amicaux.",
+    "Temple": "Un ancien temple oublié par le temps.",
+    "Château": "Le château du roi, majestueux et protégé."
 }
 # Position de départ (ligne, colonne)
 START_POS = (1, 1)
-BOSS_POS = (2, 2)
+BOSS_POS = (4, 4)
 
 def random_event(player):
     """Retourne 'monster' ou 'item' aléatoirement, et crée l'entité correspondante."""
