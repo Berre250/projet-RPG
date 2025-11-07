@@ -85,6 +85,25 @@ def use_item(player, item_name, monster=None):
         print("Vous utilisez le Couteau : +15 attaques pendant le combat.")
         return True
     
+    if item_name == "Épée":
+        player.temp_attack += 25
+        player.inventory.remove("Épée")
+        print("Vous brandissez l'Épée : +25 attaque pendant le combat.")
+        return True
+
+    if item_name == "Hache":
+        player.temp_attack += 30
+        player.inventory.remove("Hache")
+        print("Vous maniez la Hache : +30 attaque pendant le combat.")
+        return True
+
+    if item_name == "Arc":
+        player.temp_attack += 20
+        player.inventory.remove("Arc")
+        print("Vous bandez l'Arc : +20 attaque pendant le combat.")
+        return True
+
+    
     if item_name == "Attack Boost":
         player.temp_attack += 10
         player.inventory.remove("Attack Boost")
@@ -96,6 +115,7 @@ def use_item(player, item_name, monster=None):
         player.inventory.remove("Defense Boost")
         print("Vous utilisez Defense Boost : +10 défense pendant le combat.")
         return True
+    
 
     print("Objet inconnu.")
     return False
@@ -203,7 +223,8 @@ def random_event(player):
         monster = Monster("Monstre", m_level)
         return ("monster", monster)
     else:
-        item = random.choice(["Potion", "Attack Boost", "Defense Boost"])
+        item = random.choice(["Potion", "Attack Boost", "Defense Boost", "Épée", "Hache", "Arc"])
+
         return ("item", item)
 
 def find_item(player, item):
