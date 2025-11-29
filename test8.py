@@ -1,5 +1,4 @@
 import random
-from collections import Counter
 
 # Classes 
 class Player:
@@ -29,7 +28,6 @@ class Player:
 
     def gain_xp(self, amount):
         self.xp += amount
-        print(f"→ {self.name} gagne {amount} XP (total: {self.xp}).")
         # seuil simple : 50 * niveau
         while self.xp >= self.level * 50:
             self.xp -= self.level * 50
@@ -41,7 +39,6 @@ class Player:
         self.base_attack += 5
         self.base_defense += 3
         self.hp = self.max_hp
-        print(f"*** {self.name} passe au niveau {self.level} ! HP, attaque et défense augmentés. ***")
 
     def reset_combat_buffs(self):
         self.temp_attack = 0
@@ -59,89 +56,10 @@ class Monster:
     def is_alive(self):
         return self.hp > 0
 
-# Objets et utilisation 
-def use_item(player, item_name, monster=None):
-    """
-    Return True if an action was performed (item used), False otherwise.
-    Effects:
-    - Potion: soigne 30 HP (ne dépasse pas max_hp)
-    - Attack Boost: +10 attack pendant le combat
-    - Defense Boost: +10 defense pendant le combat
-    """
-    if item_name not in player.inventory:
-        print("Vous n'avez pas cet objet.")
-        return False
-
-    if item_name == "Potion":
-        heal = 30
-        player.hp = min(player.max_hp, player.hp + heal)
-        player.inventory.remove("Potion")
-        print(f"Vous buvez une Potion et récupérez {heal} HP (HP: {player.hp}/{player.max_hp}).")
-        return True
-    
-    if item_name == "Couteau":
-        player.temp_attack += 15
-        player.inventory.remove("Couteau")
-        print("Vous utilisez le Couteau : +15 attaques pendant le combat.")
-        return True
-    
-    if item_name == "Épée":
-        player.temp_attack += 25
-        player.inventory.remove("Épée")
-        print("Vous brandissez l'Épée : +25 attaque pendant le combat.")
-        return True
-
-    if item_name == "Hache":
-        player.temp_attack += 30
-        player.inventory.remove("Hache")
-        print("Vous maniez la Hache : +30 attaque pendant le combat.")
-        return True
-
-    if item_name == "Arc":
-        player.temp_attack += 20
-        player.inventory.remove("Arc")
-        print("Vous bandez l'Arc : +20 attaque pendant le combat.")
-        return True
-
-    
-    if item_name == "Attack Boost":
-        player.temp_attack += 10
-        player.inventory.remove("Attack Boost")
-        print("Vous utilisez Attack Boost : +10 attaque pendant le combat.")
-        return True
-
-    if item_name == "Defense Boost":
-        player.temp_defense += 10
-        player.inventory.remove("Defense Boost")
-        print("Vous utilisez Defense Boost : +10 défense pendant le combat.")
-        return True
-    
-
-    print("Objet inconnu.")
-    return False
-
 #  Combat 
 import tkinter as tk
 from tkinter import ttk
 import random
-import os
-
-# ---------------------------
-# UTILITAIRES
-# ---------------------------
-def try_load_image(path, size=None):
-    """
-    Tente de charger une image PhotoImage (png/gif). Si échec, retourne None.
-    size: (w,h) n'est pas appliqué si PIL n'est pas disponible.
-    """
-    try:
-        if not os.path.exists(path):
-            return None
-        # PhotoImage supporte png/gif on standard Tk
-        img = tk.PhotoImage(file=path)
-        return img
-    except Exception:
-        return None
 
 # ---------------------------
 # FONCTION battle (UI riche)
@@ -281,16 +199,6 @@ def battle(root, player, monster, callback_end):
     def log_msg(msg, tag="info"):
         log.insert("end", msg + "\n", tag)
         log.see("end")
-
-    # ---------------------------
-    # Right: controls + info
-    # ---------------------------
-
-        # ---------------------------
-    # Right: controls + info
-    # ---------------------------
-    right_center = tk.Frame(center_frame, bg=BG)
-    right_center.pack(side="right", fill="y", padx=(12,0))
 
     # Forcer une largeur pour que les boutons ne disparaissent pas
     right_center.pack_propagate(False)
@@ -454,9 +362,6 @@ def battle(root, player, monster, callback_end):
         inv_win.title("Inventaire")
         inv_win.geometry("280x300")
         inv_win.configure(bg="#0b0f12")
-
-        win.configure(highlightthickness=0)
-        
         inv_win.transient(win)
         inv_win.grab_set()
 
@@ -543,14 +448,14 @@ def battle(root, player, monster, callback_end):
 
             # 5) Attack Boost — augmente attack pour tout le combat
             elif item == "Attack Boost":
-                player.attack += 5
-                log_msg("Ton attaque augmente de +5 ⚔️", "player")
+                player.temp_attack += 5
+                log_msg("Ton attaque augmente de +5 ⚔️ (temporaire)", "player")
                 player.inventory.remove(item)
 
             # 6) Defense Boost — augmente defense pour tout le combat
             elif item == "Defense Boost":
-                player.defense += 5
-                log_msg("Ta défense augmente de +5 🛡️", "player")
+                player.temp_defense += 5
+                log_msg("Ta défense augmente de +5 🛡️ (temporaire)", "player")
                 player.inventory.remove(item)
 
             # 7) Si objet inconnu
@@ -655,119 +560,10 @@ def random_event(player):
 
         return ("item", item)
 
-def find_item(player, item):
-    player.inventory.append(item)
-    print(f"🎁 Tu trouves un objet : {item} !")
 
-#  Déplacements 
-def move(position, direction):
-    x, y = position
-    direction = direction.lower()
-    if direction in ("n", "north", "go north", "go_north"):
-        nx, ny = x - 1, y
-    elif direction in ("s", "south", "go south", "go_south"):
-        nx, ny = x + 1, y
-    elif direction in ("w", "west", "go west", "go_west"):
-        nx, ny = x, y - 1
-    elif direction in ("e", "east", "go east", "go_east"):
-        nx, ny = x, y + 1
-    else:
-        return position  # commande inconnue  pas de mouvement
-
-    # Vérifie limites
-    if 0 <= nx < len(MAP) and 0 <= ny < len(MAP[0]):
-        return (nx, ny)
-    else:
-        print("Tu ne peux pas aller dans cette direction (bord de la carte).")
-        return position
-
-#  Menu 
-def start_game():
-    name = input("Entrez votre nom : ").strip() or "Hero" #strip() pour éviter les espaces vides
-    player = Player(name)
-    position = START_POS
-    print(f"\nBienvenue {player.name} ! {MAP_DESCRIPTIONS['Départ']}")
-    print("Tape 'help' pour les commandes.\n")
-
-    while True:
-        if not player.is_alive():
-            print("Tu es mort. Retour au menu principal.")
-            break
-
-        cmd = input("Action (n/s/e/w, look, inventory, quit) > ").strip().lower()
-        if cmd in ("quit", "q"):
-            print("Retour au menu principal.")
-            break
-        if cmd in ("help",):
-            print("Commandes : n/north, s/south, e/east, w/west, look, inventory, stats, quit")
-            continue
-        if cmd in ("inventory", "inv"):
-            print("Inventaire :", player.inventory)
-            continue
-        if cmd in ("stats",):
-            print(f"{player.name} — Niveau {player.level} — XP: {player.xp} — HP: {player.hp}/{player.max_hp} — Att: {player.base_attack} — Def: {player.base_defense}")
-            continue
-        if cmd in ("look",):
-            place = MAP[position[0]][position[1]]
-            print(place, ":", MAP_DESCRIPTIONS.get(place, "Aucune description."))
-            continue
-
-        # déplacement
-        new_pos = move(position, cmd)
-        if new_pos == position:
-            # soit commande inconnue, soit tentative hors carte
-            continue
-
-        position = new_pos
-        place = MAP[position[0]][position[1]]
-        print(f"\n🌍 Tu arrives à : {place}")
-        print(MAP_DESCRIPTIONS.get(place, ""))
-
-        # Aucun aléa sur Départ ni sur Boss
-        if position == START_POS:
-            print("C'est le point de départ. Rien d'intéressant ici.")
-            continue
-
-        if position == BOSS_POS:
-            print("!!! Tu rencontres le Boss final !!!")
-            boss = Monster("Boss final", max(6, player.level + 4))
-            fought = battle(player, boss)
-            if fought and player.is_alive():
-                print("\n🏆 FELICITATIONS ! Tu as vaincu le boss et sors de la forêt !")
-            else:
-                print("\nLe boss t'a vaincu ou tu as fui. Fin de la partie.")
-            break
-
-        # Événement aléatoire sur autres cases
-        event_type, payload = random_event(player)
-        if event_type == "monster":
-            fought = battle(player, payload)
-            if not fought and not player.is_alive():
-                # Si mort, sortie de la boucle principale 
-                pass
-        elif event_type == "item":
-            find_item(player, payload)
-
-#  Menu principal 
-def main_menu():
-    while True:
-        print("\n=== MENU PRINCIPAL ===")
-        print("1) Nouvelle Partie")
-        print("2) Charger (non disponible)")
-        print("3) Quitter")
-        choix = input("> ").strip()
-        if choix == "1":
-            start_game()
-        elif choix == "2":
-            print("Chargement non disponible ici.")
-        elif choix == "3":
-            print("À bientôt !")
-            break
-        else:
-            print("Choix invalide.")
 
 if __name__ == "__main__":
-    main_menu()
+    main()
 
 
 # test8.py
